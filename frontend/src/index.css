@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 96%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 210 40% 98%;
+
+    --warning: 48 96% 51%;
+    --warning-foreground: 222 47% 11%;
+
+    --border: 215 28% 19%;
+    --input: 215 28% 19%;
+    --ring: 221 83% 63%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 215 28% 15%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 28% 15%;
+    --sidebar-ring: 221 83% 63%;
+
+    --font-sans: 'Geist Sans', 'Geist', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+    --shadow-card: 0 0 0 1px hsl(215 28% 15%), 0px 1px 2px hsl(0 0% 0% / 0.1), 0px 4px 12px hsl(0 0% 0% / 0.1);
+    --shadow-card-hover: 0 0 0 1px hsl(215 28% 17%), 0px 1px 2px hsl(0 0% 0% / 0.1), 0px 8px 16px hsl(0 0% 0% / 0.1);
+    --shadow-primary-glow: 0 0 20px hsl(221 83% 53% / 0.15);
+
+    --ease-out-expo: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .card-surface {
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius);
+    transition: box-shadow 150ms var(--ease-out-expo);
+  }
+
+  .card-surface:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .card-surface-static {
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius);
+  }
+
+  .text-display {
+    font-family: var(--font-sans);
+    font-size: clamp(3rem, 7vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .text-heading {
+    font-family: var(--font-sans);
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .text-body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
