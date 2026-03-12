@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && uvicorn main:app --reload --port 8000",
+    "dev:backend": "cd backend && venv\\Scripts\\uvicorn main:app --reload --port 8000",
     "dev:frontend": "npm --prefix frontend run dev",
     "install:all": "npm --prefix frontend install"
   },

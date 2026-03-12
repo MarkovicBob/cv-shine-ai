@@ -25,7 +25,7 @@ const AppShell = () => {
       .from("profiles")
       .select("full_name")
       .eq("user_id", user.id)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         setDisplayName(data?.full_name || user.email || "");
       });

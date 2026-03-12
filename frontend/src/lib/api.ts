@@ -58,8 +58,37 @@ export async function analyzeCV(
   return res.json();
 }
 
+function detectLanguage(jobDescription: string): "de" | "en" {
+  const germanWords = [
+    "und", "die", "der", "das", "für", "mit", "bei", "wir", "ihr",
+    "kenntnisse", "erfahrung", "entwickler", "stelle", "aufgaben",
+    "anforderungen", "bewerbung", "deutsch", "arbeit", "beruf",
+    "gesucht", "teamfähig", "abschluss", "studium", "lebenslauf",
+  ];
+  const lower = jobDescription.toLowerCase();
+  const matches = germanWords.filter((w) => lower.includes(w)).length;
+  return matches >= 3 ? "de" : "en";
+}
+
+function buildFileName(name: string | undefined, jobDescription: string): string {
+  const lang = detectLanguage(jobDescription);
+  const suffix = lang === "de" ? "Lebenslauf" : "Resume";
+
+  if (!name) return `CV_${suffix}`;
+
+  const parts = name.trim().split(/\s+/);
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  if (parts.length === 1) return `${capitalize(parts[0])}_${suffix}`;
+
+  // "Firstname Lastname" → "Lastname_Firstname_Resume/Lebenslauf"
+  const lastname = capitalize(parts[parts.length - 1]);
+  const firstname = parts.slice(0, -1).map(capitalize).join("_");
+  return `${lastname}_${firstname}_${suffix}`;
+}
+
 // ── Generate PDF via Python/ReportLab ─────────────────────────────────────
-export async function generatePdf(optimizedCv: OptimizedCV, userId: string): Promise<void> {
+export async function generatePdf(optimizedCv: OptimizedCV, userId: string, jobDescription = ""): Promise<void> {
   const headers = await getAuthHeaders();
 
   const res = await fetch(`${API_URL}/api/pdf/generate`, {
@@ -78,7 +107,7 @@ export async function generatePdf(optimizedCv: OptimizedCV, userId: string): Pro
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `optimized-cv-${optimizedCv.name?.replace(/\s+/g, "-").toLowerCase() || "cv"}.pdf`;
+  a.download = `${buildFileName(optimizedCv.name, jobDescription)}.pdf`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

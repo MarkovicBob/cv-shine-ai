@@ -3,6 +3,7 @@ from models.schemas import AnalyzeRequest, AnalysisResult, SaveAnalysisRequest
 from services.ai_analyzer import analyze_cv
 from services.supabase_service import check_rate_limit, increment_analyses_count, save_analysis
 from utils.auth import verify_token
+from utils.job_fetcher import is_url, fetch_job_description
 
 router = APIRouter(prefix="/analyze", tags=["analyze"])
 
@@ -12,7 +13,7 @@ async def analyze_endpoint(
     body: AnalyzeRequest,
     user_id: str = Depends(verify_token),
 ):
-    """Analyze CV against job description using OpenAI GPT-4o."""
+    """Analyze CV against job description using Claude AI."""
     # Verify user_id matches token
     if body.user_id != user_id:
         raise HTTPException(status_code=403, detail="User ID mismatch.")
@@ -24,8 +25,13 @@ async def analyze_endpoint(
             detail="Free tier limit reached (3 analyses/month). Upgrade to Pro."
         )
 
+    # If user pasted a URL instead of text, fetch the actual job description
+    job_description = body.job_description
+    if is_url(job_description):
+        job_description = fetch_job_description(job_description)
+
     # Run AI analysis
-    result = analyze_cv(body.cv_text, body.job_description)
+    result = analyze_cv(body.cv_text, job_description)
 
     # Save to database
     save_analysis(SaveAnalysisRequest(
@@ -35,7 +41,7 @@ async def analyze_endpoint(
         original_score=result.ats_score,
         optimized_score=100,
         cv_text=body.cv_text,
-        job_description=body.job_description,
+        job_description=job_description,
         optimized_cv=result.optimized_cv.model_dump(),
         suggestions=[s.model_dump() for s in result.suggestions],
         missing_keywords=result.missing_keywords,

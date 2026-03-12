@@ -41,7 +41,7 @@ const HistoryPage = () => {
     if (!row.optimized_cv || !user) return;
     setDownloading(row.id);
     try {
-      await generatePdf(row.optimized_cv, user.id);
+      await generatePdf(row.optimized_cv, user.id, row.job_description || "");
       toast.success("PDF downloaded!");
     } catch (err: any) {
       toast.error(err.message || "Failed to generate PDF");

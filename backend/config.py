@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_service_key: str = ""
     anthropic_api_key: str = ""
-    frontend_url: str = "http://localhost:3000"
+    frontend_url: str = "http://localhost:8080"
 
     class Config:
         env_file = ".env"

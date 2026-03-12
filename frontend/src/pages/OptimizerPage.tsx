@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Upload, FileText, Link2, CheckCircle2, ArrowRight, ArrowLeft, Loader2, Download } from "lucide-react";
+import { Upload, FileText, Link2, CheckCircle2, ArrowRight, ArrowLeft, Loader2, Download, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,19 @@ const AnimatedScore = ({ value }: { value: number }) => {
   });
   return <>{display}</>;
 };
+
+const BLOCKED_DOMAINS = ["linkedin.com", "xing.com"];
+
+function detectJobInputType(text: string): "url-blocked" | "url-other" | "text" {
+  const trimmed = text.trim();
+  try {
+    const url = new URL(trimmed);
+    if (BLOCKED_DOMAINS.some((d) => url.hostname.includes(d))) return "url-blocked";
+    return "url-other";
+  } catch {
+    return "text";
+  }
+}
 
 const OptimizerPage = () => {
   const { user } = useAuth();
@@ -62,6 +75,11 @@ const OptimizerPage = () => {
 
   const handleAnalyze = async () => {
     if (!user) { toast.error("Please log in first"); return; }
+    if (detectJobInputType(jobDescription) === "url-blocked") {
+      toast.error("LinkedIn link nije podržan — nalepi tekst oglasa direktno.");
+      setCurrentStep(2);
+      return;
+    }
     setIsAnalyzing(true); setAnalysisComplete(false);
     try {
       const data = await analyzeCV(cvText, jobDescription, user.id);
@@ -78,7 +96,7 @@ const OptimizerPage = () => {
     if (!result?.optimized_cv || !user) return;
     setIsGeneratingPdf(true);
     try {
-      await generatePdf(result.optimized_cv, user.id);
+      await generatePdf(result.optimized_cv, user.id, jobDescription);
       toast.success("PDF downloaded!");
     } catch (err: any) {
       toast.error(err.message || "Failed to generate PDF");
@@ -125,20 +143,67 @@ const OptimizerPage = () => {
                 </motion.div>
               )}
 
-              {currentStep === 2 && (
-                <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
-                  <div className="card-surface-static p-6">
-                    <label className="text-sm font-medium">Job Description</label>
-                    <p className="mt-1 text-xs text-muted-foreground">Paste the full job description for best ATS matching.</p>
-                    <textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the full job description here — requirements, responsibilities, skills..." className="mt-3 h-56 w-full resize-none rounded-lg border border-input bg-input/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background" />
-                    <p className="mt-2 text-xs text-muted-foreground">{jobDescription.length.toLocaleString()} characters</p>
-                  </div>
-                  <div className="mt-6 flex justify-between">
-                    <Button variant="ghost" onClick={() => setCurrentStep(1)}><ArrowLeft className="h-4 w-4" /> Back</Button>
-                    <Button disabled={jobDescription.trim().length < 50} onClick={() => { setCurrentStep(3); handleAnalyze(); }}>Analyze with AI <ArrowRight className="h-4 w-4" /></Button>
-                  </div>
-                </motion.div>
-              )}
+              {currentStep === 2 && (() => {
+                const inputType = detectJobInputType(jobDescription);
+                const isBlocked = inputType === "url-blocked";
+                const isOtherUrl = inputType === "url-other";
+                const canAnalyze = inputType === "text" && jobDescription.trim().length >= 50;
+                return (
+                  <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+                    <div className="card-surface-static p-6">
+                      <label className="text-sm font-medium">Job Description</label>
+                      <p className="mt-1 text-xs text-muted-foreground">Paste the full job description for best ATS matching.</p>
+                      <textarea
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        placeholder="Paste the full job description here — requirements, responsibilities, skills..."
+                        className={cn(
+                          "mt-3 h-56 w-full resize-none rounded-lg border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
+                          isBlocked
+                            ? "border-destructive bg-destructive/5 focus:ring-destructive"
+                            : isOtherUrl
+                            ? "border-warning bg-warning/5 focus:ring-warning"
+                            : "border-input bg-input/50 focus:ring-ring"
+                        )}
+                      />
+
+                      {isBlocked && (
+                        <div className="mt-3 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                          <div>
+                            <p className="text-sm font-medium text-destructive">LinkedIn ne dozvoljava automatsko čitanje</p>
+                            <p className="mt-0.5 text-xs text-destructive/80">
+                              Otvori oglas na LinkedIn-u, selektuj ceo tekst opisa posla (Ctrl+A ili ručno), kopiraj ga i nalepi ovde umesto linka.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {isOtherUrl && (
+                        <div className="mt-3 flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                          <div>
+                            <p className="text-sm font-medium text-warning">Detektovan je URL — pokušaćemo da ga pročitamo</p>
+                            <p className="mt-0.5 text-xs text-warning/80">
+                              Ako sajt blokira pristup, dobićeš grešku. Preporučujemo da ručno nalepiš tekst oglasa za bolje rezultate.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {!isBlocked && !isOtherUrl && (
+                        <p className="mt-2 text-xs text-muted-foreground">{jobDescription.length.toLocaleString()} characters</p>
+                      )}
+                    </div>
+                    <div className="mt-6 flex justify-between">
+                      <Button variant="ghost" onClick={() => setCurrentStep(1)}><ArrowLeft className="h-4 w-4" /> Back</Button>
+                      <Button disabled={!canAnalyze && !isOtherUrl} onClick={() => { setCurrentStep(3); handleAnalyze(); }}>
+                        Analyze with AI <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })()}
 
               {currentStep === 3 && (
                 <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>

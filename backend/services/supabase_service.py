@@ -15,8 +15,13 @@ def get_supabase() -> Client:
 
 def get_profile(user_id: str) -> dict:
     sb = get_supabase()
-    res = sb.table("profiles").select("*").eq("user_id", user_id).single().execute()
-    return res.data or {}
+    res = sb.table("profiles").select("*").eq("user_id", user_id).execute()
+    if res.data:
+        return res.data[0]
+    # Profile doesn't exist — auto-create (user registered before trigger was set up)
+    new_profile = {"user_id": user_id, "subscription_tier": "free", "analyses_count": 0}
+    sb.table("profiles").insert(new_profile).execute()
+    return new_profile
 
 
 def check_rate_limit(user_id: str) -> bool:
