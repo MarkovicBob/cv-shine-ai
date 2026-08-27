@@ -1,0 +1,49 @@
+# Environment variables (sadrže API ključeve!)
+.env
+.env.local
+.env.*.local
+
+# Python virtual environment
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Distribution / build
+dist/
+build/
+*.egg-info/
+*.egg
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploaded files (temp storage)
+uploads/
+temp/
+*.tmp
+
+# Logs
+*.log
+logs/
