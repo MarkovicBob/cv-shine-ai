@@ -13,7 +13,7 @@ async def verify_token(authorization: str = Header(...)) -> str:
     settings = get_settings()
 
     try:
-        # Use Supabase to verify the token
+        # Supabase proverava potpis i istek tokena; ne verujemo samo lokalno dekodiranom payload-u.
         sb = create_client(settings.supabase_url, settings.supabase_service_key)
         user = sb.auth.get_user(token)
         if not user or not user.user:

@@ -14,26 +14,26 @@ async def analyze_endpoint(
     user_id: str = Depends(verify_token),
 ):
     """Analyze CV against job description using Claude AI."""
-    # Verify user_id matches token
+    # Ne verujemo user_id vrednosti iz request body-ja; ona mora da odgovara potpisanom tokenu.
     if body.user_id != user_id:
         raise HTTPException(status_code=403, detail="User ID mismatch.")
 
-    # Check rate limit
+    # Free korisnik moze da pokrene najvise tri analize prema broju sacuvanom u profilu.
     if not check_rate_limit(user_id):
         raise HTTPException(
             status_code=429,
             detail="Free tier limit reached (3 analyses/month). Upgrade to Pro."
         )
 
-    # If user pasted a URL instead of text, fetch the actual job description
+    # Endpoint prihvata i obican tekst i URL oglasa; ostatak toka uvek dobija cist tekst.
     job_description = body.job_description
     if is_url(job_description):
         job_description = fetch_job_description(job_description)
 
-    # Run AI analysis
+    # Servis izoluje poziv Claude API-ja i vraca vec validiran Pydantic rezultat.
     result = analyze_cv(body.cv_text, job_description)
 
-    # Save to database
+    # Rezultat cuvamo pre povecanja brojaca da neuspesna analiza ne potrosi korisnikov limit.
     save_analysis(SaveAnalysisRequest(
         user_id=user_id,
         job_title=result.job_title,

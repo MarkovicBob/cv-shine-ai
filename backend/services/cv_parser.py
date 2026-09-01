@@ -6,6 +6,7 @@ from fastapi import UploadFile, HTTPException
 
 async def parse_cv_file(file: UploadFile) -> str:
     """Parse text from uploaded PDF or DOCX file."""
+    # Upload citamo jednom u memoriju; zato pre parsiranja ogranicavamo velicinu na 5 MB.
     content = await file.read()
 
     if file.size and file.size > 5 * 1024 * 1024:
@@ -30,11 +31,13 @@ def _parse_pdf(content: bytes) -> str:
     try:
         with pdfplumber.open(io.BytesIO(content)) as pdf:
             pages = []
+            # PDF moze imati vise stranica; tekst spajamo uz prazan red izmedju stranica.
             for page in pdf.pages:
                 text = page.extract_text()
                 if text:
                     pages.append(text.strip())
             full_text = "\n\n".join(pages)
+            # Skenirani PDF obicno nema tekstualni sloj i zahtevao bi poseban OCR servis.
             if not full_text.strip():
                 raise HTTPException(
                     status_code=400,
