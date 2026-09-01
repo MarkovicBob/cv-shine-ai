@@ -82,6 +82,7 @@ Here is the job description:
 
 Analyze the CV against the job description and return the JSON object as specified."""
 
+    # Spoljni API ima odvojene greske za neispravan kljuc, rate limit i ostale kvarove.
     try:
         response = client.messages.create(
             model="claude-sonnet-4-5",
@@ -100,16 +101,18 @@ Analyze the CV against the job description and return the JSON object as specifi
 
     content = response.content[0].text if response.content else ""
 
-    # Strip markdown fences if present
+    # Model ponekad ipak vrati ```json blok, pa ograde uklanjamo pre json.loads poziva.
     cleaned = content.strip()
     cleaned = re.sub(r"^```(?:json)?\n?", "", cleaned)
     cleaned = re.sub(r"\n?```$", "", cleaned)
 
+    # Najpre zahtevamo strogo validan JSON, umesto da dalje obradjujemo proizvoljan tekst.
     try:
         data = json.loads(cleaned)
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"AI returned invalid JSON: {str(e)}")
 
+    # Ne prosledjujemo sirov AI JSON direktno klijentu: pretvaramo ga u stroge Pydantic modele.
     try:
         optimized_cv_data = data.get("optimized_cv", {})
         experience = [ExperienceItem(**exp) for exp in optimized_cv_data.get("experience", [])]
