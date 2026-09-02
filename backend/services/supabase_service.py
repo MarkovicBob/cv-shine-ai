@@ -1,3 +1,4 @@
+# pyright: reportMissingImports=false
 from supabase import create_client, Client
 from config import get_settings
 from models.schemas import SaveAnalysisRequest
