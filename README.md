@@ -1,6 +1,6 @@
 # CVMatch Pro 🎯
 
-**AI-powered CV optimizer** — 100/100 ATS score guaranteed.
+**AI-powered CV optimizer** — upload a CV, paste a job ad, get an ATS score, missing keywords and an AI-rewritten CV as PDF.
 
 **Stack:**
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS + shadcn/ui
