@@ -2,6 +2,18 @@
 
 **AI-powered CV optimizer** — upload a CV, paste a job ad, get an ATS score, missing keywords and an AI-rewritten CV as PDF.
 
+## Screenshots
+
+<a href="https://portfoliobob.netlify.app/projects/cvmatch/demo.mp4"><img src="https://portfoliobob.netlify.app/projects/cvmatch/poster.webp" alt="Demo video" width="100%"></a>
+
+<sub>▶ Click the image to watch the demo video · more on <a href="https://portfoliobob.netlify.app/#projects">portfoliobob.netlify.app</a></sub>
+
+<table>
+<tr><td width="50%"><img src="https://portfoliobob.netlify.app/projects/cvmatch/1.webp" alt="Screenshot 1" width="100%"></td><td width="50%"><img src="https://portfoliobob.netlify.app/projects/cvmatch/2.webp" alt="Screenshot 2" width="100%"></td></tr>
+<tr><td width="50%"><img src="https://portfoliobob.netlify.app/projects/cvmatch/3.webp" alt="Screenshot 3" width="100%"></td><td width="50%"><img src="https://portfoliobob.netlify.app/projects/cvmatch/4.webp" alt="Screenshot 4" width="100%"></td></tr>
+<tr><td width="50%"><img src="https://portfoliobob.netlify.app/projects/cvmatch/5.webp" alt="Screenshot 5" width="100%"></td><td width="50%"><img src="https://portfoliobob.netlify.app/projects/cvmatch/6.webp" alt="Screenshot 6" width="100%"></td></tr>
+</table>
+
 **Stack:**
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS + shadcn/ui
 - **Backend:** Python + FastAPI + ReportLab + pdfplumber + Anthropic Claude Sonnet
